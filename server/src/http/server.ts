@@ -3,7 +3,10 @@ import fastifySwagger from "@fastify/swagger";
 import scalarUI from '@scalar/fastify-api-reference';
 import { fastify } from "fastify";
 import { jsonSchemaTransform, serializerCompiler, validatorCompiler } from "fastify-type-provider-zod";
-import { env } from "./env.ts";
+
+import { env } from "@/env";
+import { createLinkRoute } from "@/http/routes/create-link.route";
+import { getLinksRoute } from "./routes/get-links.route";
 
 const app = fastify();
 
@@ -40,6 +43,9 @@ app.register(scalarUI, {
     theme: 'purple'
   }
 });
+
+app.register(createLinkRoute);
+app.register(getLinksRoute);
 
 app.listen({ port: env.PORT }, (_, address) => {
   console.log("HTTP server running!")

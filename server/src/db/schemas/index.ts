@@ -1,3 +1,3 @@
-import { links } from "./links.ts";
+import { links } from "./links";
 
 export const schema = { links }
