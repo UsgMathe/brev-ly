@@ -1,21 +1,11 @@
 import { db } from "@/db";
 import { schema } from "@/db/schemas";
 import { env } from "@/env";
-import { count, desc } from "drizzle-orm";
-import { z } from "zod";
-import { PaginationMeta } from "../schemas/response.schemas";
+import { count, desc, eq, sql } from "drizzle-orm";
 
+type CreateLinkInput = typeof schema.links.$inferInsert;
 
-export const createLinkSchema = z.object({
-  targetUrl: z.url({ message: 'URL inválida' }),
-  slug: z.string({ message: 'Link encurtado inválido' }).min(3, 'Link encurtado deve ter pelo menos 3 caracteres').max(255, 'Link encurtado deve ter no máximo 255 caracteres'),
-})
-
-type CreateLinkInput = z.input<typeof createLinkSchema>
-type CreateLinkOutput = { id: number; url: string }
-
-export async function createLink(input: CreateLinkInput): Promise<CreateLinkOutput> {
-  const { targetUrl, slug } = createLinkSchema.parse(input)
+export async function createLink({ targetUrl, slug }: CreateLinkInput) {
 
   const result = await db.insert(schema.links).values({
     targetUrl,
@@ -28,26 +18,16 @@ export async function createLink(input: CreateLinkInput): Promise<CreateLinkOutp
   }
 };
 
-export const getLinksSchema = z.object({
-  targetUrl: z.url(),
-  slug: z.string(),
-  fullUrl: z.url(),
-  id: z.number(),
-  accessesCount: z.number(),
-  createdAt: z.date(),
-});
+function mountShortenedUrl(slug: string) {
+  return `${env.CLOUDFLARE_PUBLIC_URL}/${slug}`
+}
 
 export type GetLinksInput = {
   page: number
   perPage: number
 }
 
-export type GetLinksOutput = {
-  links: z.infer<typeof getLinksSchema>[]
-  meta: PaginationMeta
-}
-
-export async function getLinks({ page, perPage }: GetLinksInput): Promise<GetLinksOutput> {
+export async function getLinks({ page, perPage }: GetLinksInput) {
   const offset = (page - 1) * perPage
 
   const [totalCount] = await db.select({ count: count() }).from(schema.links)
@@ -57,7 +37,7 @@ export async function getLinks({ page, perPage }: GetLinksInput): Promise<GetLin
 
   const links = result.map((link) => ({
     ...link,
-    fullUrl: `${env.CLOUDFLARE_PUBLIC_URL}/${link.slug}`,
+    shortenedUrl: mountShortenedUrl(link.slug),
   }))
 
   return {
@@ -69,4 +49,59 @@ export async function getLinks({ page, perPage }: GetLinksInput): Promise<GetLin
       totalPages: Math.ceil(total / perPage),
     },
   }
+}
+
+export async function getLinkById(id: number) {
+  const result = await db.select().from(schema.links).where(eq(schema.links.id, id))
+
+  if (!result[0]) {
+    return null
+  }
+
+  return {
+    ...result[0],
+    shortenedUrl: mountShortenedUrl(result[0].slug),
+  };
+}
+
+export async function getLinkBySlug(slug: string) {
+  const result = await db.select().from(schema.links).where(eq(schema.links.slug, slug))
+
+  if (!result[0]) {
+    return null
+  }
+
+  return {
+    ...result[0],
+    shortenedUrl: mountShortenedUrl(result[0].slug),
+  };
+}
+
+export async function deleteLinkById(id: number) {
+  await db.delete(schema.links).where(eq(schema.links.id, id))
+}
+
+export async function getLinkByShortenedUrl(shortenedUrl: string) {
+  const slug = shortenedUrl.split(`${env.CLOUDFLARE_PUBLIC_URL}/`).pop()
+
+  if (!slug) {
+    return null
+  }
+
+  const result = await db.select().from(schema.links).where(eq(schema.links.slug, slug))
+
+  if (!result[0]) {
+    return null
+  }
+
+  return {
+    ...result[0],
+    shortenedUrl: mountShortenedUrl(result[0].slug),
+  };
+}
+
+export async function updateLinkAccessesCount(id: number) {
+  await db.update(schema.links).set({
+    accessesCount: sql`${schema.links.accessesCount} + 1`,
+  }).where(eq(schema.links.id, id))
 }

@@ -2,6 +2,7 @@ import { getLinks } from '@/http/services/links.service'
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import { z } from 'zod'
 import { paginationMetaSchema } from '../schemas/response.schemas'
+import { getLinkSchema } from './schemas/get-link.schema'
 
 export const getLinksRoute: FastifyPluginAsyncZod = async (server) => {
   server.get(
@@ -16,17 +17,32 @@ export const getLinksRoute: FastifyPluginAsyncZod = async (server) => {
         }),
         response: {
           200: z.object({
-            links: z.array(z.object({
-              id: z.number().int().describe('Link ID'),
-              targetUrl: z.string().describe('Link target URL'),
-              slug: z.string().describe('Link slug'),
-              fullUrl: z.string().describe('Link full URL'),
-              accessesCount: z.number().int().describe('Link accesses count'),
-              createdAt: z.date().describe('Link created at'),
-            })),
+            links: z.array(getLinkSchema),
             meta: paginationMetaSchema
-          }),
-          400: z.object({ message: z.string() }),
+          })
+            .meta({
+              example: {
+                links: [
+                  {
+                    id: 1,
+                    targetUrl: 'https://google.com',
+                    slug: 'google',
+                    shortenedUrl: 'https://brev.ly/google',
+                    accessesCount: 0,
+                    createdAt: new Date(),
+                  },
+                ],
+                meta: {
+                  page: 1,
+                  perPage: 10,
+                  total: 1,
+                  totalPages: 1,
+                },
+              },
+            })
+            .describe('Links list'),
+          400: z.object({ message: z.string() })
+            .describe('Validation error'),
         },
       },
     },
