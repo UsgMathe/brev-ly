@@ -1,6 +1,7 @@
+import { getLinkBySlug } from "@/http/services/get-link-by-slug.service"
+import { incrementLinkAccessesCount } from "@/http/services/increment-link-access-count.service"
 import { FastifyPluginAsyncZod } from "fastify-type-provider-zod"
 import z from "zod"
-import { getLinkBySlug, updateLinkAccessesCount } from "../services/links.service"
 
 export const redirectShortenedUrlRoute: FastifyPluginAsyncZod = async (server) => {
   server.get(
@@ -35,7 +36,7 @@ export const redirectShortenedUrlRoute: FastifyPluginAsyncZod = async (server) =
         return reply.status(404).send({ message: 'Link not found' })
       }
 
-      await updateLinkAccessesCount(link.id)
+      await incrementLinkAccessesCount(link.id)
 
       return reply.redirect(link.targetUrl)
     }

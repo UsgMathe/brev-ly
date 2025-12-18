@@ -1,7 +1,7 @@
+import { getLinkSchema } from '@/http/routes/schemas/get-link.schema'
+import { getLinkById } from '@/http/services/get-link-by-id.service'
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import { z } from 'zod'
-import { getLinkById } from '../services/links.service'
-import { getLinkSchema } from './schemas/get-link.schema'
 
 export const getLinkByIdRoute: FastifyPluginAsyncZod = async (server) => {
   server.get(

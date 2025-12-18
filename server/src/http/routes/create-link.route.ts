@@ -1,4 +1,5 @@
-import { createLink, getLinkBySlug } from '@/http/services/links.service'
+import { createLink } from '@/http/services/create-link.service'
+import { getLinkBySlug } from '@/http/services/get-link-by-slug.service'
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import { z } from 'zod'
 

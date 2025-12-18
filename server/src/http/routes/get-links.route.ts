@@ -1,8 +1,8 @@
-import { getLinks } from '@/http/services/links.service'
+import { getLinkSchema } from '@/http/routes/schemas/get-link.schema'
+import { paginationMetaSchema } from '@/http/schemas/response.schemas'
+import { getLinks } from '@/http/services/get-links.service'
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import { z } from 'zod'
-import { paginationMetaSchema } from '../schemas/response.schemas'
-import { getLinkSchema } from './schemas/get-link.schema'
 
 export const getLinksRoute: FastifyPluginAsyncZod = async (server) => {
   server.get(

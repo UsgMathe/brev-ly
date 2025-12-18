@@ -1,6 +1,7 @@
+import { deleteLinkById } from '@/http/services/delete-link-by-id.service'
+import { getLinkById } from '@/http/services/get-link-by-id.service'
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import { z } from 'zod'
-import { deleteLinkById, getLinkById } from '../services/links.service'
 
 export const deleteLinkRoute: FastifyPluginAsyncZod = async (server) => {
   server.delete(
