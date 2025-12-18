@@ -1,7 +1,7 @@
 import { db } from "@/db"
 import { schema } from "@/db/schemas"
 import { count, desc } from "drizzle-orm"
-import { mountShortenedUrl } from "../utils/links.utils"
+import { mountShortenedUrl } from "@/http/utils/links.utils"
 
 export type GetLinksInput = {
   page: number

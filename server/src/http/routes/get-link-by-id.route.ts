@@ -1,5 +1,5 @@
 import { getLinkSchema } from '@/http/routes/schemas/get-link.schema'
-import { getLinkById } from '@/http/services/get-link-by-id.service'
+import { getLinkById } from '@/app/services/get-link-by-id.service'
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import { z } from 'zod'
 

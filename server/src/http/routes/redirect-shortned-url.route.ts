@@ -1,5 +1,5 @@
-import { getLinkBySlug } from "@/http/services/get-link-by-slug.service"
-import { incrementLinkAccessesCount } from "@/http/services/increment-link-access-count.service"
+import { getLinkBySlug } from "@/app/services/get-link-by-slug.service"
+import { incrementLinkAccessesCount } from "@/app/services/increment-link-access-count.service"
 import { FastifyPluginAsyncZod } from "fastify-type-provider-zod"
 import z from "zod"
 

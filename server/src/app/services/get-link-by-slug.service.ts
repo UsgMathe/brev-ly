@@ -1,16 +1,9 @@
 import { db } from "@/db"
 import { schema } from "@/db/schemas"
 import { eq } from "drizzle-orm"
-import { env } from "@/env"
-import { mountShortenedUrl } from "../utils/links.utils"
+import { mountShortenedUrl } from "@/http/utils/links.utils"
 
-export async function getLinkByShortenedUrl(shortenedUrl: string) {
-  const slug = shortenedUrl.split(`${env.SERVER_BASE_URL}/`).pop()
-
-  if (!slug) {
-    return null
-  }
-
+export async function getLinkBySlug(slug: string) {
   const result = await db.select().from(schema.links).where(eq(schema.links.slug, slug))
 
   if (!result[0]) {

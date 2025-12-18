@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { schema } from "@/db/schemas";
-import { mountShortenedUrl } from "../utils/links.utils";
+import { mountShortenedUrl } from "@/http/utils/links.utils";
 
 type CreateLinkInput = typeof schema.links.$inferInsert;
 
