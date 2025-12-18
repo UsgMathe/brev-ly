@@ -3,6 +3,10 @@ import { schema } from "@/db/schemas";
 import { env } from "@/env";
 import { count, desc, eq, sql } from "drizzle-orm";
 
+function mountShortenedUrl(slug: string) {
+  return `${env.SERVER_BASE_URL}/${slug}`
+}
+
 type CreateLinkInput = typeof schema.links.$inferInsert;
 
 export async function createLink({ targetUrl, slug }: CreateLinkInput) {
@@ -14,13 +18,11 @@ export async function createLink({ targetUrl, slug }: CreateLinkInput) {
 
   return {
     id: result[0].id,
-    url: `${env.CLOUDFLARE_PUBLIC_URL}/${slug}`
+    url: mountShortenedUrl(result[0].slug),
   }
 };
 
-function mountShortenedUrl(slug: string) {
-  return `${env.CLOUDFLARE_PUBLIC_URL}/${slug}`
-}
+
 
 export type GetLinksInput = {
   page: number
@@ -82,7 +84,7 @@ export async function deleteLinkById(id: number) {
 }
 
 export async function getLinkByShortenedUrl(shortenedUrl: string) {
-  const slug = shortenedUrl.split(`${env.CLOUDFLARE_PUBLIC_URL}/`).pop()
+  const slug = shortenedUrl.split(`${env.SERVER_BASE_URL}/`).pop()
 
   if (!slug) {
     return null
