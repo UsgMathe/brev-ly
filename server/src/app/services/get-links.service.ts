@@ -1,7 +1,7 @@
 import { db } from "@/db"
 import { schema } from "@/db/schemas"
 import { count, desc } from "drizzle-orm"
-import { mountShortenedUrl } from "@/http/utils/links.utils"
+import { buildShortenedUrl } from "@/http/utils/links.utils"
 
 export type GetLinksInput = {
   page: number
@@ -18,7 +18,7 @@ export async function getLinks({ page, perPage }: GetLinksInput) {
 
   const links = result.map((link) => ({
     ...link,
-    shortenedUrl: mountShortenedUrl(link.slug),
+    shortenedUrl: buildShortenedUrl(link.slug),
   }))
 
   return {

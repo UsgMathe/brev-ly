@@ -7,12 +7,24 @@ import { jsonSchemaTransform, serializerCompiler, validatorCompiler, ZodTypeProv
 import { env } from "@/env";
 import { createLinkRoute } from "@/http/routes/create-link.route";
 import { deleteLinkRoute } from "./routes/delete-link.route";
+import { exportLinksRoute } from "./routes/export-links.route";
 import { getLinkByIdRoute } from "./routes/get-link-by-id.route";
 import { getLinkBySlugRoute } from "./routes/get-link-by-slug.route";
 import { getLinksRoute } from "./routes/get-links.route";
 import { redirectShortenedUrlRoute } from "./routes/redirect-shortned-url.route";
 
-const app = fastify();
+const app = fastify({
+  logger: {
+    transport: {
+      target: 'pino-pretty',
+      options: {
+        colorize: true,
+        translateTime: 'yyyy-mm-dd HH:MM:ss',
+        ignore: 'pid,hostname',
+      },
+    },
+  },
+});
 
 app.setValidatorCompiler(validatorCompiler);
 app.setSerializerCompiler(serializerCompiler);
@@ -56,6 +68,7 @@ app.register(getLinkByIdRoute);
 app.register(getLinkBySlugRoute);
 app.register(deleteLinkRoute);
 app.register(redirectShortenedUrlRoute);
+app.register(exportLinksRoute);
 
 app.listen({ port: env.PORT }, (err, address) => {
   if (err) {

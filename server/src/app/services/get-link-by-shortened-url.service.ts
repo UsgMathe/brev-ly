@@ -2,7 +2,7 @@ import { db } from "@/db"
 import { schema } from "@/db/schemas"
 import { eq } from "drizzle-orm"
 import { env } from "@/env"
-import { mountShortenedUrl } from "@/http/utils/links.utils"
+import { buildShortenedUrl } from "@/http/utils/links.utils"
 
 export async function getLinkByShortenedUrl(shortenedUrl: string) {
   const slug = shortenedUrl.split(`${env.SERVER_BASE_URL}/`).pop()
@@ -19,6 +19,6 @@ export async function getLinkByShortenedUrl(shortenedUrl: string) {
 
   return {
     ...result[0],
-    shortenedUrl: mountShortenedUrl(result[0].slug),
+    shortenedUrl: buildShortenedUrl(result[0].slug),
   };
 }
