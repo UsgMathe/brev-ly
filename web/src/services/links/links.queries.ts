@@ -23,7 +23,7 @@ export const linksKeys = {
   paginated: (params?: GetPaginatedLinksRequestParams) => [linksKey, params],
 };
 
-export async function useCreateLink(data: CreateLinkDTO) {
+export function useCreateLink(data: CreateLinkDTO) {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -32,7 +32,7 @@ export async function useCreateLink(data: CreateLinkDTO) {
   });
 }
 
-export async function useLinkById(id: Link["id"]) {
+export function useLinkById(id: Link["id"]) {
   return useQuery({
     queryKey: linksKeys.byId(id),
     queryFn: () => getLinkByIdRequest(id),
@@ -40,7 +40,7 @@ export async function useLinkById(id: Link["id"]) {
   });
 }
 
-export async function useLinkBySlug(slug: Link["slug"]) {
+export function useLinkBySlug(slug: Link["slug"]) {
   return useQuery({
     queryKey: linksKeys.bySlug(slug),
     queryFn: () => getLinkBySlugRequest(slug),
@@ -48,10 +48,10 @@ export async function useLinkBySlug(slug: Link["slug"]) {
   });
 }
 
-export async function usePaginatedLinks(params: GetPaginatedLinksRequestParams) {
+export function usePaginatedLinks(params?: GetPaginatedLinksRequestParams) {
   return useInfiniteQuery({
     queryKey: linksKeys.paginated(params),
-    queryFn: () => getPaginatedLinksRequest(params),
+    queryFn: ({ pageParam }) => getPaginatedLinksRequest({ ...params, page: pageParam }),
     getNextPageParam: ({ meta }) => {
       if (!meta) return undefined;
       return meta.page < meta.totalPages ? meta.page + 1 : undefined;
@@ -60,11 +60,11 @@ export async function usePaginatedLinks(params: GetPaginatedLinksRequestParams) 
       if (!meta) return undefined;
       return meta.page > 1 ? meta.page - 1 : undefined;
     },
-    initialPageParam: params.page,
+    initialPageParam: params?.page,
   });
 }
 
-export async function useExportLinks(params: ExportLinksRequestParams) {
+export function useExportLinks(params: ExportLinksRequestParams) {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -73,7 +73,7 @@ export async function useExportLinks(params: ExportLinksRequestParams) {
   });
 }
 
-export async function useDeleteLink(id: Link["id"]) {
+export function useDeleteLink(id: Link["id"]) {
   const queryClient = useQueryClient();
 
   return useMutation({

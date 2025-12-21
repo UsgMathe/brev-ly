@@ -1,11 +1,19 @@
-import './index.css'
+import './index.css';
 
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import { App } from './app'
+import { createRoot } from 'react-dom/client';
+import { BrowserRouter, Route, Routes } from 'react-router';
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-)
+import { AppProviders } from "@/providers/app.providers";
+import { HomePage } from "@/services/pages/home.page";
+
+const root = document.getElementById("root");
+
+createRoot(root!).render(
+  <BrowserRouter>
+    <AppProviders>
+      <Routes>
+        <Route index element={<HomePage />} />
+      </Routes>
+    </AppProviders>
+  </BrowserRouter>,
+);
