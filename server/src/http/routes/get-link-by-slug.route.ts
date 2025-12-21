@@ -23,7 +23,7 @@ export const getLinkBySlugRoute: FastifyPluginAsyncZod = async (server) => {
                 targetUrl: 'https://google.com',
                 slug: 'google',
                 shortenedUrl: 'https://brev.ly/google',
-                accessesCount: 0,
+                accessCount: 0,
                 createdAt: new Date(),
               },
             })

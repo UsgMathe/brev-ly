@@ -4,7 +4,7 @@ import { z } from 'zod'
 
 export const exportLinksRoute: FastifyPluginAsyncZod = async server => {
   server.post(
-    '/links/exports',
+    '/links/export',
     {
       schema: {
         summary: 'Export links',

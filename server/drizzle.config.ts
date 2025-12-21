@@ -1,4 +1,4 @@
-import { env } from '@/env.ts'
+import { env } from '@/env'
 import type { Config } from 'drizzle-kit'
 
 export default {

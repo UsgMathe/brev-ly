@@ -4,7 +4,7 @@ export const links = pgTable('links', {
   id: serial('id').primaryKey(),
   targetUrl: text('target_url').notNull(),
   slug: text('slug').notNull().unique(),
-  accessesCount: integer('accesses_count').default(0).notNull(),
+  accessCount: integer('access_count').default(0).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 

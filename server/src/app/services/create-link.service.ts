@@ -12,7 +12,7 @@ export async function createLink({ targetUrl, slug }: CreateLinkInput) {
   }).returning();
 
   return {
-    id: result[0].id,
-    url: buildShortenedUrl(result[0].slug),
+    ...result[0],
+    shortenedUrl: buildShortenedUrl(result[0].slug),
   }
 };

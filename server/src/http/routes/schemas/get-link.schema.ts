@@ -5,6 +5,6 @@ export const getLinkSchema = z.object({
   targetUrl: z.string().describe('Link target URL'),
   slug: z.string().describe('Link slug'),
   shortenedUrl: z.string().describe('Link shortened URL'),
-  accessesCount: z.number().describe('Link accesses count'),
+  accessCount: z.number().describe('Link accesses count'),
   createdAt: z.date().describe('Link created at'),
 })

@@ -28,7 +28,7 @@ export async function exportLinks(
         id: schema.links.id,
         slug: schema.links.slug,
         target_url: schema.links.targetUrl,
-        accesses_count: schema.links.accessesCount,
+        accesses_count: schema.links.accessCount,
         created_at: schema.links.createdAt,
       })
       .from(schema.links)

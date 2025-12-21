@@ -2,6 +2,7 @@ import { createLink } from '@/app/services/create-link.service'
 import { getLinkBySlug } from '@/app/services/get-link-by-slug.service'
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import { z } from 'zod'
+import { getLinkSchema } from './schemas/get-link.schema'
 
 export const createLinkRoute: FastifyPluginAsyncZod = async (server) => {
   server.post(
@@ -11,15 +12,16 @@ export const createLinkRoute: FastifyPluginAsyncZod = async (server) => {
         summary: 'Create a link',
         tags: ['links'],
         response: {
-          201: z.object({
-            id: z.number().describe('Link ID'),
-            url: z.string().describe('Link URL'),
-          })
+          201: getLinkSchema
             .meta({
               example: {
                 id: 1,
-                url: 'https://google.com'
-              }
+                targetUrl: 'https://google.com',
+                slug: 'google',
+                shortenedUrl: 'https://brev.ly/google',
+                accessCount: 0,
+                createdAt: new Date(),
+              },
             })
             .describe('Link created'),
           400: z.object({ message: z.string() })
