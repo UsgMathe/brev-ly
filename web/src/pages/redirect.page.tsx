@@ -20,7 +20,7 @@ export function RedirectPage() {
 
   if (link.isError || incrementAccessCount.isError) return (
     <div className="px-3 h-dvh flex items-center justify-center">
-      <Card className="w-full max-w-md py-12">
+      <Card className="w-full max-w-xl py-12 md:px-12 md:py-16">
         <CardContent className="flex flex-col items-center gap-6 text-center">
           <Error404Vector className="w-40" />
           <h1 className="text-xl">Link não encontrado</h1>
@@ -35,7 +35,7 @@ export function RedirectPage() {
 
   return (
     <div className="px-3 h-dvh flex items-center justify-center">
-      <Card className="w-full max-w-md py-12">
+      <Card className="w-full max-w-xl py-12 md:px-12 md:py-16">
         <CardContent className="flex flex-col items-center gap-6 text-center">
           <LogoIconVector className="w-16" />
           <h1 className="text-xl">Redirecionando...</h1>
