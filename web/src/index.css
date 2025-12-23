@@ -23,6 +23,17 @@
   --text-md: 14px;
   --text-lg: 18px;
   --text-xl: 24px;
+
+  --animate-border-loading: border-loading 1s linear infinite;
+
+  @keyframes border-loading {
+    0% {
+      background-position: -30% 0;
+    }
+    100% {
+      background-position: 130% 0;
+    }
+  }
 }
 
 @theme inline {

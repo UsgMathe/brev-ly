@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { InView } from "react-intersection-observer";
 
 import { useCreateLink, useDeleteLink, useExportLinks, usePaginatedLinks } from "@/services/links/links.queries";
@@ -14,6 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { env } from "@/env";
+import { cn } from "@/lib/utils";
 import { apiErrorToast } from "@/utils/api.utils";
 import { DownloadSimpleIcon, LinkIcon, SpinnerIcon } from "@phosphor-icons/react";
 
@@ -22,7 +23,10 @@ export function HomePage() {
 
   const createLink = useCreateLink({
     onSuccess: () => {
-      createLinkForm.reset();
+      createLinkForm.reset({
+        targetUrl: "",
+        slug: "",
+      });
     },
     onError: (error) => {
       const axiosError = apiErrorToast(error, {
@@ -84,7 +88,7 @@ export function HomePage() {
   }
 
   return (
-    <div className="py-8 px-3 grid">
+    <div className="py-8 px-3 grid md:px-12 lg:px-44 md:py-16">
 
       <ConfirmationDialog
         open={!!linkToDelete}
@@ -101,10 +105,10 @@ export function HomePage() {
       />
 
 
-      <LogoVector className="w-28 mb-5 mx-auto" />
+      <LogoVector className="w-28 mb-5 md:mb-6 mx-auto md:mx-0" />
 
-      <div className="flex flex-col gap-3">
-        <Card>
+      <div className="flex gap-3 flex-col md:grid md:grid-cols-10 justify-center">
+        <Card className="md:col-span-4 h-fit">
           <CardHeader>
             <CardTitle>Novo link</CardTitle>
           </CardHeader>
@@ -112,6 +116,7 @@ export function HomePage() {
           <CardContent>
             <form className="space-y-4" onSubmit={createLinkForm.handleSubmit(submitCreateLink)}>
               <Input
+                autoFocus
                 id="targetUrl"
                 label="Link original"
                 placeholder="https://exemplo.com.br"
@@ -120,18 +125,29 @@ export function HomePage() {
                 {...createLinkForm.register("targetUrl")}
               />
 
-              <Input
-                id="slug"
-                label="Link encurtado"
-                errorMessage={createLinkForm.formState.errors.slug?.message}
-                disabled={createLinkForm.formState.isSubmitting}
-                prefix={`${env.VITE_FRONTEND_URL}/`}
-                {...createLinkForm.register("slug")}
+              <Controller
+                name="slug"
+                control={createLinkForm.control}
+                render={({ field: { value, onChange, ...field } }) => (
+                  <Input
+                    id="slug"
+                    label="Link encurtado"
+                    value={value ?? ""}
+                    errorMessage={createLinkForm.formState.errors.slug?.message}
+                    disabled={createLinkForm.formState.isSubmitting}
+                    prefix={`${env.VITE_FRONTEND_URL}/`}
+                    onChangeValue={value => {
+                      value = value.toLowerCase();
+                      onChange(value.replace(/[^a-z0-9-]/g, ""));
+                    }}
+                    {...field}
+                  />
+                )}
               />
 
               <Button
                 type="submit"
-                className="w-full mt-1"
+                className="w-full max-w-none mt-1"
                 disabled={createLinkForm.formState.isSubmitting}
               >
                 {
@@ -151,7 +167,10 @@ export function HomePage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className={cn(
+          "md:col-span-6 h-fit",
+          paginatedLinks.isFetching ? "animate-border-loading bg-size-[30%_2px] bg-no-repeat bg-[linear-gradient(90deg,var(--color-blue-base))]" : ""
+        )}>
           <CardHeader>
             <div className="w-full flex justify-between items-center gap-2">
               <CardTitle>Meus links</CardTitle>
@@ -181,7 +200,7 @@ export function HomePage() {
             <div className="space-y-4">
               <Separator />
 
-              <div className="space-y-3">
+              <div className="space-y-3 md:max-h-[calc(100dvh-20rem)] max-h-[calc(50dvh)] overflow-y-auto pr-2">
                 {
                   paginatedLinks.isLoading ? (
                     <div className="px-4 py-6 flex flex-col items-center gap-3 animate-pulse">
@@ -200,7 +219,6 @@ export function HomePage() {
                           {linksList?.map((link, index) => (
                             <React.Fragment key={link.id}>
                               <LinkCard link={link} onDelete={handleDeleteLink} />
-
                               {
                                 index !== linksList?.length - 1 && (
                                   <Separator aria-hidden={index === linksList?.length - 1} className="aria-hidden:hidden" />

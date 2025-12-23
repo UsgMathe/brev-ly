@@ -14,7 +14,7 @@ import {
   getLinkBySlugRequest,
   getPaginatedLinksRequest,
   incrementLinkAccessCountRequest,
-} from "@/services/links/links.api";
+} from "@/services/links/links.requests";
 import type {
   DeleteLinkResponse,
   ExportLinksParams,

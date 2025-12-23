@@ -2,17 +2,17 @@ import type { ApiPaginationMeta } from "@/api/api.types";
 import z from "zod";
 
 export const createLinkSchema = z.object({
-  targetUrl: z.url("URL inválida"),
+  targetUrl: z.url("Informe uma URL válida."),
   slug: z
-    .string("Link inválido")
-    .min(3, "O link deve ter pelo menos 3 caracteres")
-    .max(255, "O link deve ter no máximo 255 caracteres"),
+    .string("Informe uma URL minúscula e sem espaços/caracteres especiais.")
+    .min(1, "Informe uma URL minúscula e sem espaços/caracteres especiais.")
+    .max(255, "A URL deve ter no máximo 255 caracteres."),
 });
 
 export type CreateLinkDTO = z.infer<typeof createLinkSchema>;
 
 export const linkSchema = z.object({
-  id: z.number(),
+  id: z.string(),
   slug: z.string(),
   targetUrl: z.url(),
   accessCount: z.number(),
@@ -23,8 +23,8 @@ export type Link = z.infer<typeof linkSchema>;
 
 export const getPaginatedLinksSchema = z
   .object({
-    page: z.number().min(1, "Página inválida"),
-    perPage: z.number().min(1, "Página inválida").max(100, "Página inválida"),
+    page: z.number().min(1, "Página inválida."),
+    perPage: z.number().min(1, "Página inválida.").max(100, "Página inválida."),
   })
   .partial();
 

@@ -27,7 +27,7 @@ export function RedirectPage() {
 
           <p className="text-md text-gray-500">
             O link que você está tentando acessar não existe, foi removido ou é uma URL inválida. Saiba mais em{' '}
-            <a href={env.VITE_FRONTEND_URL} className="text-blue-base underline">brev.ly</a>.</p>
+            <a href={"/"} className="text-blue-base underline">brev.ly</a>.</p>
         </CardContent>
       </Card>
     </div>

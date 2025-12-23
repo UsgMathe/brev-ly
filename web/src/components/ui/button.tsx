@@ -11,7 +11,7 @@ const buttonVariants = cva(
       variant: {
         primary: "bg-blue-base hover:bg-blue-dark text-white text-md w-full max-w-[352px] px-[20px] py-[15px]",
         secondary: "bg-gray-200 text-gray-500 [&_svg]:text-gray-600 hover:ring-blue-base hover:ring p-2 text-sm font-semibold w-fit",
-        danger: "bg-danger text-white text-md py-2 px-3 text-sm hover:ring-red-base hover:ring",
+        danger: "bg-danger text-white text-md py-2 px-3 text-sm hover:ring-danger hover:ring",
       },
       size: {}
     },

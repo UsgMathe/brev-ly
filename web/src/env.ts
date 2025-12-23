@@ -1,7 +1,7 @@
 import z from "zod";
 
 const envSchema = z.object({
-  VITE_FRONTEND_URL: z.url(),
+  VITE_FRONTEND_URL: z.string(),
   VITE_BACKEND_URL: z.url(),
 });
 
