@@ -1,4 +1,10 @@
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+  type UseMutationOptions,
+} from "@tanstack/react-query";
 
 import {
   createLinkRequest,
@@ -7,11 +13,13 @@ import {
   getLinkByIdRequest,
   getLinkBySlugRequest,
   getPaginatedLinksRequest,
+  incrementLinkAccessCountRequest,
 } from "@/services/links/links.api";
 import type {
-  CreateLinkDTO,
-  ExportLinksRequestParams,
-  GetPaginatedLinksRequestParams,
+  DeleteLinkResponse,
+  ExportLinksParams,
+  ExportLinksResponse,
+  GetPaginatedLinksParams,
   Link,
 } from "@/services/links/links.schemas";
 
@@ -20,15 +28,23 @@ export const linksKey = "links";
 export const linksKeys = {
   byId: (id: Link["id"]) => [linksKey, id],
   bySlug: (slug: Link["slug"]) => [linksKey, slug],
-  paginated: (params?: GetPaginatedLinksRequestParams) => [linksKey, params],
+  paginated: (params?: GetPaginatedLinksParams) => [linksKey, params],
 };
 
-export function useCreateLink(data: CreateLinkDTO) {
+interface UseCreateLinkOptions {
+  onSuccess?: (response: Link) => any;
+  onError?: (error: unknown) => any;
+}
+export function useCreateLink({ onSuccess, onError }: UseCreateLinkOptions = {}) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: () => createLinkRequest(data),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: [linksKey], exact: false }),
+    mutationFn: createLinkRequest,
+    onSuccess: async (response) => {
+      await queryClient.invalidateQueries({ queryKey: [linksKey], exact: false });
+      await onSuccess?.(response);
+    },
+    onError: (error) => onError?.(error),
   });
 }
 
@@ -40,15 +56,29 @@ export function useLinkById(id: Link["id"]) {
   });
 }
 
-export function useLinkBySlug(slug: Link["slug"]) {
+interface UseLinkBySlugOptions {
+  onSuccess?: (response: Link) => any;
+  onError?: (error: unknown) => any;
+}
+export function useLinkBySlug(slug: Link["slug"], { onSuccess, onError }: UseLinkBySlugOptions = {}) {
   return useQuery({
     queryKey: linksKeys.bySlug(slug),
-    queryFn: () => getLinkBySlugRequest(slug),
+    queryFn: () =>
+      getLinkBySlugRequest(slug)
+        .then((response) => {
+          onSuccess?.(response);
+          return response;
+        })
+        .catch((error) => {
+          onError?.(error);
+          throw error;
+        }),
     enabled: !!slug,
+    retry: false,
   });
 }
 
-export function usePaginatedLinks(params?: GetPaginatedLinksRequestParams) {
+export function usePaginatedLinks(params?: GetPaginatedLinksParams) {
   return useInfiniteQuery({
     queryKey: linksKeys.paginated(params),
     queryFn: ({ pageParam }) => getPaginatedLinksRequest({ ...params, page: pageParam }),
@@ -64,20 +94,38 @@ export function usePaginatedLinks(params?: GetPaginatedLinksRequestParams) {
   });
 }
 
-export function useExportLinks(params: ExportLinksRequestParams) {
-  const queryClient = useQueryClient();
-
+export function useIncrementLinkAccessCount(options?: UseMutationOptions<Link, unknown, Link["id"]>) {
   return useMutation({
-    mutationFn: () => exportLinksRequest(params),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: [linksKey], exact: false }),
+    mutationFn: incrementLinkAccessCountRequest,
+    ...options,
   });
 }
 
-export function useDeleteLink(id: Link["id"]) {
+interface UseExportLinksOptions extends ExportLinksParams {
+  onSuccess?: (response: ExportLinksResponse) => any;
+  onError?: (error: unknown) => any;
+}
+export function useExportLinks({ onSuccess, onError, ...params }: UseExportLinksOptions = {}) {
+  return useMutation({
+    mutationFn: () => exportLinksRequest(params),
+    onSuccess: async (response) => await onSuccess?.(response),
+    onError: (error) => onError?.(error),
+  });
+}
+
+interface UseDeleteLinkOptions {
+  onSuccess?: (response: DeleteLinkResponse) => any;
+  onError?: (error: unknown) => any;
+}
+export function useDeleteLink({ onSuccess, onError }: UseDeleteLinkOptions = {}) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: () => deleteLinkRequest(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: [linksKey], exact: false }),
+    mutationFn: deleteLinkRequest,
+    onSuccess: async (response) => {
+      await queryClient.invalidateQueries({ queryKey: [linksKey], exact: false });
+      await onSuccess?.(response);
+    },
+    onError: (error) => onError?.(error),
   });
 }
