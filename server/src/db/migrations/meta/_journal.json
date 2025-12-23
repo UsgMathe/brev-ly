@@ -15,6 +15,13 @@
       "when": 1766279462066,
       "tag": "0001_damp_sebastian_shaw",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1766455451440,
+      "tag": "0002_curved_kingpin",
+      "breakpoints": true
     }
   ]
 }

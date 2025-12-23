@@ -2,6 +2,6 @@ import { db } from "@/db"
 import { schema } from "@/db/schemas"
 import { eq } from "drizzle-orm"
 
-export async function deleteLinkById(id: number) {
+export async function deleteLinkById(id: string) {
   await db.delete(schema.links).where(eq(schema.links.id, id))
 }

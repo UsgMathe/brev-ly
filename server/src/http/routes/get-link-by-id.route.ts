@@ -1,5 +1,5 @@
-import { getLinkSchema } from '@/http/routes/schemas/get-link.schema'
 import { getLinkById } from '@/app/services/get-link-by-id.service'
+import { getLinkSchema } from '@/http/routes/schemas/get-link.schema'
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import { z } from 'zod'
 
@@ -11,7 +11,7 @@ export const getLinkByIdRoute: FastifyPluginAsyncZod = async (server) => {
         summary: 'Get link by id',
         tags: ['links'],
         params: z.object({
-          id: z.string({ message: 'Id is required' })
+          id: z.string({ message: 'ID do link é obrigatório' })
         }),
         response: {
           200: getLinkSchema
@@ -34,10 +34,10 @@ export const getLinkByIdRoute: FastifyPluginAsyncZod = async (server) => {
     },
     async (request, reply) => {
       const { id } = request.params
-      const result = await getLinkById(Number(id))
+      const result = await getLinkById(id)
 
       if (!result) {
-        return reply.status(404).send({ message: 'Link not found' })
+        return reply.status(404).send({ message: 'Link não encontrado' })
       }
 
       return reply.status(200).send(result)

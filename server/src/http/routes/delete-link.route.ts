@@ -11,7 +11,7 @@ export const deleteLinkRoute: FastifyPluginAsyncZod = async (server) => {
         summary: 'Delete link',
         tags: ['links'],
         params: z.object({
-          id: z.string({ message: 'Id is required' })
+          id: z.string({ message: 'ID do link é obrigatório' })
         }),
         response: {
           200: z.object({ message: z.string() })
@@ -26,13 +26,13 @@ export const deleteLinkRoute: FastifyPluginAsyncZod = async (server) => {
     async (request, reply) => {
       const { id } = request.params
 
-      const foundLink = await getLinkById(Number(id))
+      const foundLink = await getLinkById(id)
       if (!foundLink) {
-        return reply.status(404).send({ message: 'Link not found' })
+        return reply.status(404).send({ message: 'Link não encontrado' })
       }
 
-      await deleteLinkById(Number(id))
-      return reply.status(200).send({ message: 'Link deleted' })
+      await deleteLinkById(id)
+      return reply.status(200).send({ message: 'Link deletado' })
     }
   )
 

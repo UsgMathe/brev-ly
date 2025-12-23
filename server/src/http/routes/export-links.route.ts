@@ -9,11 +9,13 @@ export const exportLinksRoute: FastifyPluginAsyncZod = async server => {
       schema: {
         summary: 'Export links',
         tags: ['links'],
-        querystring: z.object({
+        body: z.object({
+          host: z.url("Host inválido"),
           searchQuery: z.string().optional(),
         })
           .meta({
             example: {
+              host: 'http://localhost:3333',
               searchQuery: 'example'
             }
           }),
@@ -30,9 +32,9 @@ export const exportLinksRoute: FastifyPluginAsyncZod = async server => {
     },
 
     async (request, reply) => {
-      const { searchQuery } = request.query
+      const { host, searchQuery } = request.body;
 
-      const result = await exportLinks({ searchQuery })
+      const result = await exportLinks({ host, searchQuery })
 
       return reply.status(200).send(result)
     }

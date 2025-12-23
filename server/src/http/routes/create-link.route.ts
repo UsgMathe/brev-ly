@@ -1,8 +1,9 @@
-import { createLink } from '@/app/services/create-link.service'
-import { getLinkBySlug } from '@/app/services/get-link-by-slug.service'
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import { z } from 'zod'
-import { getLinkSchema } from './schemas/get-link.schema'
+
+import { createLink } from '@/app/services/create-link.service'
+import { getLinkBySlug } from '@/app/services/get-link-by-slug.service'
+import { getLinkSchema } from '@/http/routes/schemas/get-link.schema'
 
 export const createLinkRoute: FastifyPluginAsyncZod = async (server) => {
   server.post(
@@ -11,6 +12,21 @@ export const createLinkRoute: FastifyPluginAsyncZod = async (server) => {
       schema: {
         summary: 'Create a link',
         tags: ['links'],
+        body: z.object({
+          targetUrl: z.url({ message: 'URL inválida' }),
+          slug: z.string({ message: 'Link encurtado inválido' })
+            .max(255, 'Link encurtado deve ter no máximo 255 caracteres')
+            .regex(
+              /^[a-z0-9-]+$/,
+              'Slug deve conter apenas letras minúsculas, números e hífen'
+            )
+            .transform(s => s.toLowerCase()),
+        }).meta({
+          example: {
+            targetUrl: 'https://google.com',
+            slug: 'google',
+          }
+        }),
         response: {
           201: getLinkSchema
             .meta({
@@ -26,17 +42,6 @@ export const createLinkRoute: FastifyPluginAsyncZod = async (server) => {
           409: z.object({ message: z.string() })
             .describe('Validation error'),
         },
-        body: z.object({
-          targetUrl: z.url({ message: 'URL inválida' }),
-          slug: z.string({ message: 'Link encurtado inválido' })
-            .min(3, 'Link encurtado deve ter pelo menos 3 caracteres')
-            .max(255, 'Link encurtado deve ter no máximo 255 caracteres'),
-        }).meta({
-          example: {
-            targetUrl: 'https://google.com',
-            slug: 'google',
-          }
-        }),
       },
     },
     async (request, reply) => {

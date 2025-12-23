@@ -12,7 +12,7 @@ export const incrementLinkAccessCountRoute: FastifyPluginAsyncZod = async (serve
         summary: 'Increment link access count',
         tags: ['links'],
         params: z.object({
-          id: z.coerce.number({
+          id: z.string({
             error: 'ID inválido'
           }),
         }).meta({
@@ -35,7 +35,7 @@ export const incrementLinkAccessCountRoute: FastifyPluginAsyncZod = async (serve
       const foundLink = await getLinkById(id)
 
       if (!foundLink) {
-        return reply.status(404).send({ message: 'Link not found' })
+        return reply.status(404).send({ message: 'Link não encontrado' })
       }
 
       const updatedLink = await incrementLinkAccessCount(foundLink.id)

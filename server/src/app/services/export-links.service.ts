@@ -1,14 +1,16 @@
 import { stringify as stringifyCSV } from 'csv-stringify';
-import { ilike } from "drizzle-orm";
+import { desc, ilike } from "drizzle-orm";
+import { PassThrough, Transform } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
 import { z } from "zod";
 
 import { db, pg } from "@/db";
 import { schema } from "@/db/schemas";
+import { Link } from '@/db/schemas/links';
 import { uploadFileToStorage } from '@/storage/services/upload-file-to-storage.service';
-import { PassThrough, Transform } from 'node:stream';
-import { pipeline } from 'node:stream/promises';
 
 const exportLinksInputSchema = z.object({
+  host: z.url(),
   searchQuery: z.string().optional(),
 })
 
@@ -19,7 +21,7 @@ export async function exportLinks(
   input: ExportLinksInput
 ):
   Promise<GetLinksOutput> {
-  const { searchQuery } = exportLinksInputSchema.parse(input)
+  const { host, searchQuery } = exportLinksInputSchema.parse(input)
 
   const { sql, params } =
     db
@@ -27,10 +29,11 @@ export async function exportLinks(
         id: schema.links.id,
         slug: schema.links.slug,
         target_url: schema.links.targetUrl,
-        accesses_count: schema.links.accessCount,
+        access_count: schema.links.accessCount,
         created_at: schema.links.createdAt,
       })
       .from(schema.links)
+      .orderBy(desc(schema.links.createdAt))
       .where(
         searchQuery ? ilike(schema.links.targetUrl, `%${searchQuery}%`) : undefined,
       ).toSQL()
@@ -43,8 +46,8 @@ export async function exportLinks(
     columns: [
       { key: 'id', header: 'ID' },
       { key: 'target_url', header: 'Original URL' },
-      { key: 'shortened_url', header: 'Shortened URL' },
-      { key: 'accesses_count', header: 'Access Count' },
+      { key: 'slug', header: 'Short URL' },
+      { key: 'access_count', header: 'Access Count' },
       { key: 'created_at', header: 'Created At' }
     ]
   })
@@ -55,9 +58,12 @@ export async function exportLinks(
     cursor,
     new Transform({
       objectMode: true,
-      transform(chunks: any[], _, callback) {
+      transform(chunks: Link[], _, callback) {
         for (const chunk of chunks) {
-          this.push(chunk)
+          this.push({
+            ...chunk,
+            slug: `${host}/${chunk.slug}`,
+          })
         }
         callback()
       },
