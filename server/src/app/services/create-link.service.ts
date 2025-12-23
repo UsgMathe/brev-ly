@@ -1,6 +1,5 @@
 import { db } from "@/db";
 import { schema } from "@/db/schemas";
-import { buildShortenedUrl } from "@/http/utils/links.utils";
 
 type CreateLinkInput = typeof schema.links.$inferInsert;
 
@@ -11,8 +10,5 @@ export async function createLink({ targetUrl, slug }: CreateLinkInput) {
     slug,
   }).returning();
 
-  return {
-    ...result[0],
-    shortenedUrl: buildShortenedUrl(result[0].slug),
-  }
+  return result[0]
 };

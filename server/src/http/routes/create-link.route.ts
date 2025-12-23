@@ -18,13 +18,12 @@ export const createLinkRoute: FastifyPluginAsyncZod = async (server) => {
                 id: 1,
                 targetUrl: 'https://google.com',
                 slug: 'google',
-                shortenedUrl: 'https://brev.ly/google',
                 accessCount: 0,
                 createdAt: new Date(),
               },
             })
             .describe('Link created'),
-          400: z.object({ message: z.string() })
+          409: z.object({ message: z.string() })
             .describe('Validation error'),
         },
         body: z.object({
@@ -45,7 +44,7 @@ export const createLinkRoute: FastifyPluginAsyncZod = async (server) => {
       const foundLink = await getLinkBySlug(slug)
 
       if (foundLink) {
-        return reply.status(400).send({ message: 'Link already exists' })
+        return reply.status(409).send({ message: 'Essa URL encurtada já existe.' })
       }
 
       const result = await createLink({ targetUrl, slug })

@@ -1,5 +1,5 @@
-import { getLinkSchema } from '@/http/routes/schemas/get-link.schema'
 import { getLinkBySlug } from '@/app/services/get-link-by-slug.service'
+import { getLinkSchema } from '@/http/routes/schemas/get-link.schema'
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import { z } from 'zod'
 
@@ -14,6 +14,10 @@ export const getLinkBySlugRoute: FastifyPluginAsyncZod = async (server) => {
           slug: z.string({ message: 'Slug is required' })
             .min(3, { message: 'Slug must be at least 3 characters long' })
             .max(255, { message: 'Slug must be at most 255 characters long' }),
+        }).meta({
+          example: {
+            slug: 'google',
+          },
         }),
         response: {
           200: getLinkSchema
@@ -22,7 +26,6 @@ export const getLinkBySlugRoute: FastifyPluginAsyncZod = async (server) => {
                 id: 1,
                 targetUrl: 'https://google.com',
                 slug: 'google',
-                shortenedUrl: 'https://brev.ly/google',
                 accessCount: 0,
                 createdAt: new Date(),
               },

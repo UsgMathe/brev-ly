@@ -27,7 +27,6 @@ export const getLinksRoute: FastifyPluginAsyncZod = async (server) => {
                     id: 1,
                     targetUrl: 'https://google.com',
                     slug: 'google',
-                    shortenedUrl: 'https://brev.ly/google',
                     accessCount: 0,
                     createdAt: new Date(),
                   },

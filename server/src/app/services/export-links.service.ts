@@ -4,7 +4,6 @@ import { z } from "zod";
 
 import { db, pg } from "@/db";
 import { schema } from "@/db/schemas";
-import { buildShortenedUrl } from '@/http/utils/links.utils';
 import { uploadFileToStorage } from '@/storage/services/upload-file-to-storage.service';
 import { PassThrough, Transform } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
@@ -58,10 +57,7 @@ export async function exportLinks(
       objectMode: true,
       transform(chunks: any[], _, callback) {
         for (const chunk of chunks) {
-          this.push({
-            ...chunk,
-            shortened_url: buildShortenedUrl(chunk.slug),
-          })
+          this.push(chunk)
         }
         callback()
       },

@@ -1,7 +1,6 @@
 import { db } from "@/db"
 import { schema } from "@/db/schemas"
 import { eq } from "drizzle-orm"
-import { buildShortenedUrl } from "@/http/utils/links.utils"
 
 export async function getLinkById(id: number) {
   const result = await db.select().from(schema.links).where(eq(schema.links.id, id))
@@ -10,8 +9,5 @@ export async function getLinkById(id: number) {
     return null
   }
 
-  return {
-    ...result[0],
-    shortenedUrl: buildShortenedUrl(result[0].slug),
-  };
+  return result[0];
 }

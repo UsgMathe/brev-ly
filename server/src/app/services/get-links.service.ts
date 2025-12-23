@@ -1,7 +1,6 @@
 import { db } from "@/db"
 import { schema } from "@/db/schemas"
 import { count, desc } from "drizzle-orm"
-import { buildShortenedUrl } from "@/http/utils/links.utils"
 
 export type GetLinksInput = {
   page: number
@@ -16,13 +15,8 @@ export async function getLinks({ page, perPage }: GetLinksInput) {
 
   const result = await db.select().from(schema.links).limit(perPage).offset(offset).orderBy(desc(schema.links.createdAt))
 
-  const links = result.map((link) => ({
-    ...link,
-    shortenedUrl: buildShortenedUrl(link.slug),
-  }))
-
   return {
-    links,
+    links: result,
     meta: {
       page,
       perPage,

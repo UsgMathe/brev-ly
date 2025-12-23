@@ -2,16 +2,17 @@ import fastifyCors from "@fastify/cors";
 import fastifySwagger from "@fastify/swagger";
 import scalarUI from '@scalar/fastify-api-reference';
 import { fastify } from "fastify";
-import { jsonSchemaTransform, serializerCompiler, validatorCompiler, ZodTypeProvider } from "fastify-type-provider-zod";
+import { hasZodFastifySchemaValidationErrors, jsonSchemaTransform, serializerCompiler, validatorCompiler, ZodTypeProvider } from "fastify-type-provider-zod";
 
 import { env } from "@/env";
 import { createLinkRoute } from "@/http/routes/create-link.route";
+import { ZodError } from "zod";
 import { deleteLinkRoute } from "./routes/delete-link.route";
 import { exportLinksRoute } from "./routes/export-links.route";
 import { getLinkByIdRoute } from "./routes/get-link-by-id.route";
 import { getLinkBySlugRoute } from "./routes/get-link-by-slug.route";
 import { getLinksRoute } from "./routes/get-links.route";
-import { redirectShortenedUrlRoute } from "./routes/redirect-shortned-url.route";
+import { incrementLinkAccessCountRoute } from "./routes/increment-link-access-count.route";
 
 const app = fastify({
   logger: {
@@ -29,10 +30,42 @@ const app = fastify({
 app.setValidatorCompiler(validatorCompiler);
 app.setSerializerCompiler(serializerCompiler);
 
+app.setErrorHandler((error, request, reply) => {
+
+  request.log.error(error);
+
+  if (hasZodFastifySchemaValidationErrors(error)) {
+
+    return reply.status(400).send({
+      message: 'Validation error.',
+      issues: error.validation.map(issue => ({
+        path: issue.instancePath,
+        message: issue.message,
+      })),
+    })
+  }
+
+  if (error instanceof ZodError) {
+    return reply.status(400).send({
+      error: "VALIDATION_ERROR",
+      message: "Validation error.",
+      issues: error.issues.map(issue => ({
+        path: issue.path.join("."),
+        message: issue.message,
+      })),
+    });
+  }
+
+  return reply.status(500).send({ message: 'Internal server error.' })
+});
+
+
 app.withTypeProvider<ZodTypeProvider>();
 
 app.register(fastifyCors, {
   origin: '*',
+  methods: ['GET', 'POST', 'DELETE'],
+
 });
 
 app.register(fastifySwagger, {
@@ -66,11 +99,11 @@ app.register(createLinkRoute);
 app.register(getLinksRoute);
 app.register(getLinkByIdRoute);
 app.register(getLinkBySlugRoute);
+app.register(incrementLinkAccessCountRoute);
 app.register(deleteLinkRoute);
-app.register(redirectShortenedUrlRoute);
 app.register(exportLinksRoute);
 
-app.listen({ port: env.PORT }, (err, address) => {
+app.listen({ port: env.PORT, host: '0.0.0.0' }, (err, address) => {
   if (err) {
     console.error(err)
     process.exit(1)
