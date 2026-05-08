@@ -1,68 +1,181 @@
-# Guia Prático de Manutenção para o Repositório Brev.ly
+# Guia de Manutenção para Brev.ly
 
 ## Mapa do Repositório
 
-O repositório Brev.ly está organizado em dois principais módulos: Backend API e Frontend UI.
+O repositório está organizado em duas partes principais: backend (server) e frontend (web).
 
-- **Backend API** (`server/src/http/routes`, `server/src/app/services`): Gerencia rotas HTTP e lógica de negócios para manipulação de links. Inclui serviços como criação, busca, exclusão e exportação de links.
+- **Backend API** (`server/src/http/routes` e `server/src/app/services`): Gerencia rotas HTTP e lógica de negócios para manipulação de links.
+- **Frontend UI** (`web/src/components` e `web/src/pages`): Componente de interface do usuário para exibição e interação com links.
 
-- **Frontend UI** (`web/src/components`, `web/src/pages`): Componente de interface e ponto de entrada da aplicação web. Gerencia a exibição de links com ações de copiar e excluir.
+## Setup do Ambiente Local
+
+Para configurar o ambiente local, siga os passos abaixo:
+
+1. **Clone o repositório**:
+   ```bash
+   git clone https://github.com/UsgMathe/brev-ly.git
+   cd brev-ly
+   ```
+
+2. **Instale as dependências**:
+   - Para backend (server):
+     ```bash
+     pnpm install --filter server
+     ```
+   - Para frontend (web):
+     ```bash
+     pnpm install --filter web
+     ```
+
+3. **Configure o .env**:
+   Copie `.env.example` para `.env` em ambos os diretórios `server` e `web` e preencha as variáveis de ambiente necessárias.
+
+4. **Prepare o banco de dados**:
+   - Gere esquemas do banco de dados:
+     ```bash
+     pnpm db:generate --filter server
+     ```
+   - Aplicar migrações do banco de dados:
+     ```bash
+     pnpm db:migrate --filter server
+     ```
+
+5. **Rodar o desenvolvimento**:
+   - Para backend (server):
+     ```bash
+     pnpm dev --filter server
+     ```
+   - Para frontend (web):
+     ```bash
+     pnpm dev --filter web
+     ```
 
 ## Tarefas de Manutenção Comuns
 
-- **Adicionar um novo endpoint**: Para adicionar um novo endpoint, siga o padrão de `server/src/http/routes/*.route.ts`. Por exemplo, para adicionar uma rota POST /links/new, crie um arquivo `new-link.route.ts` seguindo o padrão observado nos outros arquivos de rotas.
+### Adicionar uma Nova Rota no Backend
+Para adicionar uma nova rota, siga o padrão de `server/src/http/routes/create-link.route.ts`:
+```typescript
+import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
+import { z } from 'zod'
 
-- **Adicionar um novo serviço**: Para adicionar um novo serviço, siga o padrão de `server/src/app/services/*.service.ts`. Por exemplo, para adicionar um serviço de atualização de links, crie um arquivo `update-link.service.ts` seguindo o padrão observado nos outros arquivos de serviços.
+export const createLinkRoute: FastifyPluginAsyncZod = async (server) => {
+  server.post(
+    '/links',
+    {
+      schema: {
+        summary: 'Create a link',
+        tags: ['links'],
+        body: z.object({
+          targetUrl: z.url(),
+          slug: z.string()
+        }),
+        response: {
+          201: z.object({ id: z.number() })
+        },
+      },
+    },
+    async (request, reply) => {
+      // Lógica para criar link
+    }
+  )
+}
+```
 
-- **Adicionar uma nova página**: Para adicionar uma nova página no frontend, siga o padrão de `web/src/pages/*.page.tsx`. Por exemplo, para adicionar uma página de configurações, crie um arquivo `settings.page.tsx` seguindo o padrão observado nas outras páginas.
+### Adicionar um Novo Componente no Frontend
+Para adicionar um novo componente, siga o padrão de `web/src/components/link-card.tsx`:
+```typescript
+import { Button } from "@/components/ui/button";
+import type { Link as LinkType } from "@/services/links/links.schemas";
 
-- **Adicionar um novo componente**: Para adicionar um novo componente no frontend, siga o padrão de `web/src/components/*.tsx`. Por exemplo, para adicionar um componente de notificação, crie um arquivo `notification.tsx` seguindo o padrão observado nos outros componentes.
+interface LinkCardProps { link: LinkType; }
+export function LinkCard({ link }: LinkCardProps) {
+  return (
+    <div>
+      <a href={`/${link.slug}`}>{link.targetUrl}</a>
+    </div>
+  );
+}
+```
 
-## Arquivos Essenciais para Inspecionar Antes de Alterações
+### Adicionar um Novo Serviço no Backend
+Para adicionar um novo serviço, siga o padrão de `server/src/app/services/create-link.service.ts`:
+```typescript
+import { db } from "@/db";
+import { schema } from "@/db/schemas";
 
-- **Entrypoint Backend** (`server/src/http/server.ts`): Inicializa o servidor Fastify com as rotas definidas.
+type CreateLinkInput = typeof schema.links.$inferInsert;
 
-- **Entrypoint Frontend** (`web/src/main.tsx`): Configura e renderiza a aplicação React com rotas utilizando React Router.
+export async function createLink({ targetUrl, slug }: CreateLinkInput) {
+  const result = await db.insert(schema.links).values({ targetUrl, slug }).returning();
+  return result[0];
+}
+```
 
-- **Schema de Links** (`server/src/db/schemas/links.ts`): Define o schema de dados para links no banco de dados PostgreSQL.
+### Adicionar um Novo Tipo no Frontend
+Para adicionar um novo tipo, siga o padrão de `web/src/api/api.types.ts`:
+```typescript
+export interface Link {
+  id: number;
+  targetUrl: string;
+  slug: string;
+}
+```
+
+### Adicionar uma Nova Página no Frontend
+Para adicionar uma nova página, siga o padrão de `web/src/pages/home.page.tsx`:
+```typescript
+import { LinkCard } from '@/components/link-card';
+
+export function HomePage() {
+  return (
+    <div>
+      <LinkCard link={{ id: 1, targetUrl: 'https://example.com', slug: 'example' }} />
+    </div>
+  );
+}
+```
+
+## Arquivos Essenciais para Inspecionar
+
+- `server/src/http/routes/*.route.ts`: Rotas HTTP do backend.
+- `server/src/app/services/*.service.ts`: Serviços de lógica de negócios do backend.
+- `web/src/components/*.tsx`: Componentes UI do frontend.
+- `web/src/pages/*.tsx`: Páginas do frontend.
+- `server/src/db/schemas/*.ts`: Esquemas do banco de dados.
 
 ## Padrões Observados de Nomeação e Organização
 
-- **Prefixos consistentes**: Prefixos como 'createLink', 'getLinkBySlug' indicam padronização.
-
-- **Uso de 'service' e 'route'**: Separando preocupações de lógica e HTTP, onde arquivos de rotas seguem o padrão `*.route.ts` (ex: `server/src/http/routes/create-link.route.ts`) e arquivos de serviço seguem o padrão `*.service.ts` (ex: `server/src/app/services/create-link.service.ts`).
-
-- **Estrutura de diretórios**: A estrutura de diretórios está separada entre 'server' e 'web', com subdiretórios como 'http/routes' e 'app/services' indicando a separação de responsabilidades.
+- **Prefixos consistentes**: 'createLink', 'getLinks' em serviços e rotas.
+- **Uso de 'schema' e 'service'**: Em camadas de backend.
+- **Nomes de arquivos seguem padrão camelCase**.
 
 ## Áreas Sensíveis e Pontos de Acoplamento
 
-- **Segurança de rotas**: Ausência de validação de autenticação em rotas sensíveis, o que pode expor operações não autorizadas.
+- **Segurança de rotas**: Rotas expostas sem evidência clara de autenticação ou validação.
+- **Gerenciamento de estado**: Dependência de React Query sem configuração visível de cache ou revalidação.
 
-- **Gerenciamento de estado**: Dependência de React Query sem evidência de cache global, o que pode afetar a performance e a consistência dos dados.
+## Testes
+
+Não identificado no repositório analisado.
 
 ## Scripts e Variáveis de Ambiente
 
-- **Scripts Backend** (`server/package.json`):
-  - `dev`: Executa o servidor em modo de desenvolvimento.
-  - `build`: Compila o código TypeScript para JavaScript.
-  - `start`: Inicia o servidor compilado.
-  - `db:generate`: Gera migrações do banco de dados.
-  - `db:migrate`: Aplica as migrações ao banco de dados.
-  - `db:studio`: Abre o Drizzle Studio para gerenciamento do banco de dados.
+**Backend**:
+- **PORT**: Porta do servidor.
+- **DATABASE_URL**: URL do banco de dados PostgreSQL.
+- **SERVER_BASE_URL**: Base URL do servidor.
 
-- **Scripts Frontend** (`web/package.json`):
-  - `dev`: Inicia o servidor de desenvolvimento Vite.
-  - `build`: Compila a aplicação React e gera arquivos estáticos.
-  - `lint`: Executa ESLint para verificar o código.
-  - `preview`: Serve a aplicação compilada localmente.
+**Frontend**:
+- Não identificado no repositório analisado.
 
-- **Variáveis de Ambiente** (`web/.env.example`):
-  - `VITE_BACKEND_URL`: URL do backend, usada no frontend para fazer requisições HTTP.
+## Checklist antes de Abrir PR
+
+- Verifique se todas as rotas e serviços estão corretamente definidos.
+- Certifique-se de que os componentes UI estejam funcionando conforme o esperado.
+- Confira se as variáveis de ambiente necessárias estão configuradas.
+- Verifique se as migrações do banco de dados foram aplicadas corretamente.
 
 ## O Que Ainda Está Incerto
 
-- Não há evidência clara de autenticação ou controle de acesso aos links.
-
-- Não está claro se há validação de URLs ou restrições de uso.
-
-- Não há evidência de estatísticas avançadas além do accessCount.
+- Autenticação e controle de acesso nas rotas.
+- Mecanismo de armazenamento de links.
