@@ -2,27 +2,20 @@
 
 ## 30-second Overview
 
-Brev.ly is a fullstack URL shortener application developed using Fastify as the backend framework and React for the frontend. The project uses Drizzle ORM with PostgreSQL for database management, Zod for schema validation, and Tailwind CSS for styling. The application allows users to create, manage, and share shortened links.
+Brev.ly is a URL shortener application developed as part of the Pós Tech Developer 360 FTR course at Rocketseat. It uses Fastify for the backend and React for the frontend, with PostgreSQL as the database. The project includes features like creating, listing, deleting, exporting, and redirecting links.
 
 ## Mandatory Reading Order
 
-1. **Read `web/src/main.tsx` first** — it initializes the frontend application with React Router configuration for navigation routes.
-
-2. **Read `server/src/http/server.ts` next** — it initializes the Fastify server and sets up HTTP routes.
-
-3. **Read `server/src/db/schemas/links.ts`** — it defines the database schema for links, which is crucial for understanding data models.
-
-4. **Read `server/src/app/services/create-link.service.ts`** — it contains the business logic for creating links.
-
-5. **Read `web/src/components/link-card.tsx`** — it initializes the UI component for displaying and managing links.
+1. **Read `server/src/http/server.ts` first** — it initializes the Fastify HTTP server with routes and middleware.
+2. **Read `web/src/main.tsx` next** — it sets up the React application with routing and providers.
+3. **Read `server/src/app/services/create-link.service.ts`** — it contains the business logic for creating links.
+4. **Read `web/src/components/link-card.tsx`** — it defines the UI component for displaying and interacting with links.
 
 ## Confirmed Existing Surface
 
-- **Backend API**: Located in `server/src/http/routes` and `server/src/app/services`. Handles HTTP routes and business logic for link management.
-
-- **Frontend UI**: Located in `web/src/components` and `web/src/pages`. Manages the user interface and navigation routes.
-
-- **Database Schema**: Located in `server/src/db/schemas`. Defines models and migrations.
+- **Backend API**: Located in `server/src/http/routes/` and `server/src/app/services/`. Key files include `create-link.route.ts`, `get-links.route.ts`, etc.
+- **Frontend UI**: Located in `web/src/components/` and `web/src/pages/`. Key files include `link-card.tsx`, `home.page.tsx`, etc.
+- **Database Schema**: Located in `server/src/db/schemas/`. Key file is `links.ts`.
 
 ## Functional Surface
 
@@ -30,47 +23,60 @@ Brev.ly is a fullstack URL shortener application developed using Fastify as the 
   - POST `/links` — Create a link
   - GET `/links` — List all links
   - GET `/links/slug/:slug` — Get link by slug
-  - GET `/links/id/:id` — Get link by ID
+  - DELETE `/links/:id` — Delete a link by ID
   - POST `/links/export` — Export links
-  - DELETE `/links/:id` — Delete a link
-  - POST `/links/:id/access-count` — Increment link access count
+- **Frontend Routes**:
+  - `/` — Home page
+  - `/:slug` — Redirect page
 
 ## New Code Location Rules
 
-- **Backend API Routes**: Create new routes in `server/src/http/routes/` following the pattern `[operation]-link.route.ts`.
-
-- **Frontend UI Components**: Create new components in `web/src/components/` following the pattern `[ComponentName].tsx`.
-
-- **Database Schemas**: Define new schemas in `server/src/db/schemas/` following the pattern `[SchemaName].ts`.
+- **Backend API**: Create new routes in `server/src/http/routes/` following the pattern `*.route.ts`. Create new services in `server/src/app/services/` following the pattern `*.service.ts`.
+- **Frontend UI**: Create new components in `web/src/components/` following the pattern `*.tsx`. Create new pages in `web/src/pages/` following the pattern `*.page.tsx`.
 
 ## Patterns to Preserve
 
-- **File Naming**:
-  - Prefixes like `createLink`, `getLinkBySlug` indicate consistent naming.
-  - Use of `service` and `route` separates concerns between business logic and HTTP handling.
+- **File Naming**: Use prefixes like 'createLink', 'getLinks' in services and routes. Use suffixes like `*.route.ts` for routes and `*.service.ts` for services.
+- **Directory Structure**: Maintain a separate structure for backend (`server`) and frontend (`web`). Use subdirectories like `http/routes`, `app/services`, `db/schemas`.
 
-- **Directory Structure**:
-  - Separate directories for `server` and `web`.
-  - Subdirectories like `http/routes` and `app/services` indicate separation of responsibilities.
+## Tests
+
+No test files identified in analyzed context.
 
 ## Environment and Scripts
 
-- **Environment Variables**:
-  - `VITE_FRONTEND_URL`
-  - `VITE_BACKEND_URL`
+- **Backend Environment Variables**: Defined in `.env.example`.
+  - `PORT`
+  - `DATABASE_URL`
+  - `SERVER_BASE_URL`
+  - `CLOUDFLARE_ACCOUNT_ID`
+  - `CLOUDFLARE_ACCESS_KEY_ID`
+  - `CLOUDFLARE_SECRET_ACCESS_KEY`
+  - `CLOUDFLARE_BUCKET`
+  - `CLOUDFLARE_PUBLIC_URL`
+- **Backend Scripts**:
+  - `dev`: Start the development server
+  - `build`: Build the project
+  - `start`: Run the built project
+  - `db:generate`: Generate database schemas
+  - `db:migrate`: Migrate the database
+  - `db:studio`: Open Drizzle Studio
+- **Frontend Environment Variables**: Not identified in analyzed context.
+- **Frontend Scripts**:
+  - `dev`: Start the development server
+  - `build`: Build the project
+  - `lint`: Run ESLint
+  - `preview`: Preview the built project
 
-- **Scripts**:
-  - `dev`: Starts the development server.
-  - `build`: Builds the project for production.
-  - `start`: Runs the built application.
-  - `db:generate`: Generates database migrations.
-  - `db:migrate`: Applies database migrations.
-  - `db:studio`: Opens Drizzle Studio.
-  - `lint`: Lints the codebase.
-  - `preview`: Starts a preview server.
+## Mandatory Pre-modification Checklist
+
+- **Read `server/src/http/server.ts`** — understand how routes and middleware are initialized.
+- **Read `web/src/main.tsx`** — understand the React application setup.
+- **Verify `server/package.json`** — ensure all dependencies are correctly listed.
+- **Check `web/package.json`** — ensure all frontend dependencies are correctly listed.
 
 ## Forbidden Assumptions
 
-- Do not assume authentication or access control mechanisms are in place — the context confirmed their absence.
-
-- Do not assume advanced statistics beyond `accessCount` — the context confirmed its absence.
+- Do not assume the presence of authentication mechanisms in routes or services.
+- Do not assume the presence of detailed cache or revalidation configurations in React Query.
+- Do not assume the presence of a specific storage mechanism for links.
